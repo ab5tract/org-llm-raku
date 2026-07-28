@@ -2,6 +2,7 @@
 use v6.d;
 use lib $*PROGRAM.parent.add('lib').Str;
 use BPE;
+use Corpus;
 
 #| LEVEL 2 of the experiment: net cost per unit of work.
 #|
@@ -15,7 +16,11 @@ use BPE;
 #| See 00-preregistration.md -- this is why Level 2 is reported as indicative
 #| and Level 1 (which no author touched) carries the load.
 
-my $repo = $*PROGRAM.parent.parent.parent.parent.parent;
+#| The paired arms read the plugin repo's files by relative path, so they run
+#| with its root as cwd. This used to count five `.parent`s up; the extraction
+#| into a submodule added a directory and broke that silently -- exactly the
+#| failure lib/Corpus.rakumod warns about. Ask for the root instead.
+my $repo = Corpus::repo-root($*PROGRAM.IO);
 my $enc  = BPE::cl100k();
 note "loaded {$enc.name}";
 

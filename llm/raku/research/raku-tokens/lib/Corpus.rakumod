@@ -6,7 +6,7 @@ use v6.d;
 #| not just in path: the Python standard library moves with the OS's Python
 #| version, and the Raku ecosystem lives under whichever Rakudo rakubrew has
 #| selected. Recording absolute paths in the results would make the data
-#| unreadable on any other machine, and `org/llm/` exists precisely because it
+#| unreadable on any other machine, and `org/llm/raku/` exists precisely because it
 #| travels.
 #|
 #| So every root is *resolved at run time* and every recorded path is relative
@@ -16,12 +16,33 @@ use v6.d;
 unit module Corpus;
 
 #| Walk up from a starting point until the repo root is found. Counting `..`
-#| segments breaks the moment a script moves one directory.
+#| segments breaks the moment a script moves one directory -- which it did,
+#| when this tree became a submodule and gained a `raku/` level.
+#|
+#| "The repo" here is the *plugin* repo, not this one. Four of the six corpora
+#| are its files (`testData/`, `scripts/`, `src/main/java/`, `docs/`), and this
+#| tree only supplies the fifth. Mounted at `org/` in a raku-intellij-plugin
+#| checkout the walk finds it; cloned standalone there is nothing above to
+#| find, and CORPUS_REPO_ROOT says where a checkout lives.
 our sub repo-root(IO::Path $from = $?FILE.IO --> IO::Path) {
+    with %*ENV<CORPUS_REPO_ROOT> {
+        die "CORPUS_REPO_ROOT is set to $_, which is not a directory" unless .IO.d;
+        die "CORPUS_REPO_ROOT is set to $_, which has no settings.gradle.kts -- "
+            ~ "that is not a raku-intellij-plugin checkout" unless .IO.add('settings.gradle.kts').e;
+        return .IO.resolve;
+    }
     my $d = $from.absolute.IO;
     $d = $d.parent while $d && !$d.add('settings.gradle.kts').e && $d.parent ne $d;
-    die "could not locate repo root above {$from}" unless $d.add('settings.gradle.kts').e;
-    $d;
+    return $d if $d.add('settings.gradle.kts').e;
+    die join "\n",
+        "could not locate the plugin repo above {$from}.",
+        "",
+        "The measured corpora are raku-intellij-plugin's own files. This tree is",
+        "normally checked out as its `org/` submodule, where the walk upwards finds",
+        "them. Cloned on its own it cannot, so point it at a checkout:",
+        "",
+        "    CORPUS_REPO_ROOT=/path/to/raku-intellij-plugin raku {$*PROGRAM // 'the script'}",
+        "";
 }
 
 #| Python standard library. Prefers CORPUS_PYTHON_STDLIB, else picks the
