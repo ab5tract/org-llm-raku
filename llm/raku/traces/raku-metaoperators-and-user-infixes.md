@@ -80,7 +80,7 @@ argument is a perfectly well-formed dispatch that happens to mean nothing. The
 generality has no "reject this" mode, because having one would break the uniformity
 that makes `smoosh=` fall out for free.
 
-Measured, that bill is small (5–12%, `org/llm/report/raku-tokens/`). It just arrives
+Measured, that bill is small (5–12%, `org/llm/raku/report/raku-tokens/`). It just arrives
 as silence rather than as an error.
 
 Idioms in this file came from the user; the tables were verified before being written

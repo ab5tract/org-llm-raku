@@ -231,7 +231,7 @@ Both models scored a clean 100% on Python.
 ## Making the data portable
 
 First cut wrote absolute paths (`/usr/lib/python3.14/asyncio/events.py`) into the
-results. That is unreadable on any other machine, and `org/llm/` exists precisely
+results. That is unreadable on any other machine, and `org/llm/raku/` exists precisely
 because it travels.
 
 Rewriting the strings would not have been enough: two of the three roots are
@@ -268,7 +268,7 @@ nothing had changed.** The habit worth keeping is running the pipeline three tim
 and diffing before believing any figure — cheap, and it caught both.
 
 Minor self-reference worth naming: the `prose-markdown` baseline reads
-`org/llm/traces/*.md`, which includes docs edited in this same session. It is a
+`org/llm/raku/traces/*.md`, which includes docs edited in this same session. It is a
 baseline, not load-bearing, but it is not a fully independent corpus either.
 
 ## Dead ends and instrument notes

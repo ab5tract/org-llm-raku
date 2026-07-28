@@ -9,7 +9,7 @@ Every Raku method carries an **implicit `*%_`**, so an unrecognised named argume
 accepted, ignored, and never reported. `IO::Path.dir(:recursive)` returns one level and
 exits 0.
 
-That is not a theoretical concern here. `org/llm/research/raku-tokens/level3/` ran 24
+That is not a theoretical concern here. `org/llm/raku/research/raku-tokens/level3/` ran 24
 blind Raku arms against 24 Python arms on identical tasks: Raku failed 4 first attempts,
 Python 0, and **three of the four Raku failures exited 0 while printing plausible
 zeros**. Three were this exact defect (`.dir(:r)`, `.dir(:recursive)`, and historically
@@ -188,5 +188,5 @@ whitelist of understood adverbs, never an accept/reject boundary. Nothing here c
 prove an adverb invalid — only that this method does not appear to understand it. The
 rendered cheat sheet says so on its face, and it must keep saying so.
 
-Related: `org/llm/report/raku-tokens/` (the measurement that motivated this),
-`org/llm/research/raku-tokens/level3/README.md` (the blind-arm protocol).
+Related: `org/llm/raku/report/raku-tokens/` (the measurement that motivated this),
+`org/llm/raku/research/raku-tokens/level3/README.md` (the blind-arm protocol).

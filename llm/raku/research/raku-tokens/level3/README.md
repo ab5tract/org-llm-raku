@@ -117,3 +117,26 @@ exactly as in Levels 1 and 2. Only relative comparisons hold.
 
 **n=12 per cell.** Better than Level 2's n=5, still not enough to read any individual
 task as signal.
+
+## `run-01` predates the extraction of this tree
+
+`run-01` was produced while these files lived at `org/llm/` inside the plugin repo,
+before they were split out into `org-llm-raku` and re-rooted at `org/llm/raku/`. Two
+consequences, and they pull in opposite directions:
+
+**Nothing under `runs/` was touched by the move.** Every `attempt-*`, `.out`, `.err`
+and `journal.md` is byte-identical to what the arms produced, so the paths written
+*inside* them — `l5`'s `"org/llm/traces"`, the `l8` stack trace's file location — name
+the tree as it stood at run time, not as it stands now. Rewriting them would have made
+the tally in `../96-level3.tsv` describe code that was never run. Read them as a
+record, not as runnable programs.
+
+**`tasks/l5-trace-words/SPEC.md` *was* rewritten**, from `org/llm/traces/` to
+`org/llm/raku/traces/`, so the task set stays runnable against the current tree. It is
+the one place the "the spec an arm was given, and nothing else" claim in *Layout* above
+no longer holds literally; the git history of that file has the text the arms actually
+received. No other spec mentions a path under this tree.
+
+A re-run against today's checkout will not reproduce `expected/l5-trace-words.out`
+regardless, and would not have even without the move: `traces/` has gained files since,
+and l5 counts words across whatever is in it.

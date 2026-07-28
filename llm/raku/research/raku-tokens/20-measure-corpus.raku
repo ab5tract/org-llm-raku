@@ -75,7 +75,7 @@ my $eco-root = Corpus::raku-ecosystem();
     find-files($repo.add('src/main/java'), ['.java'], ['/build/', 'MAINBraid'])];
 
 @corpora.push: ['prose-markdown', 'English', $repo,
-    find-files($repo.add('org/llm/traces'), ['.md'], [])
+    find-files($repo.add('org/llm/raku/traces'), ['.md'], [])
         .append(find-files($repo.add('docs'), ['.md'], []))];
 
 my $stem = $vocab eq 'o200k' ?? '90-corpus-per-file-o200k' !! '90-corpus-per-file';

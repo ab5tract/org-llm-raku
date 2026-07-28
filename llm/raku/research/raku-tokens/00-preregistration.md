@@ -128,7 +128,7 @@ throughout; `|` would silently produce a different and wrong pretokenization.
 one-liner" exception. This experiment necessarily generates Python as an
 experimental arm.
 
-**Scope of the exemption:** Python may exist under `org/llm/research/raku-tokens/`
+**Scope of the exemption:** Python may exist under `org/llm/raku/research/raku-tokens/`
 *as measured artifact only* — a thing the experiment is about, never a thing the
 experiment runs on. Every harness, tokenizer, measurement and analysis script here
 is Raku. No Python may be introduced anywhere else in the repo, and nothing here is

@@ -1,4 +1,4 @@
-# org/llm/traces — agent-authored investigation traces & planning
+# org/llm/raku/traces — agent-authored investigation traces & planning
 
 This directory is durable, in-repo context written **by AI agents, for AI agents**
 (and curious humans). It captures the *history and intent* behind non-obvious work:
@@ -12,6 +12,14 @@ travel across computers. This project is worked on from multiple machines, so th
 subset of knowledge worth sharing across all of them lives **here, in the repo**,
 where it travels with `git`. If you're an agent starting cold on this repo, read this
 directory first — it's the fastest path to the context your predecessors paid for.
+
+It travels one step further than that now: this tree is its own repository,
+[`org-llm-raku`](https://github.com/ab5tract/org-llm-raku), mounted as the `org`
+submodule of raku-intellij-plugin. So the plugin can be cloned without it by anyone
+who would rather not have agent artifacts in their checkout, and what is *general*
+about Raku here — the named-argument work, the token measurements — is consumable by
+other projects. Traces below are still written against the plugin, and say so; a
+path like `src/main/java/...` means the parent repo, not this one.
 
 When you finish a non-trivial investigation, add a trace here. Keep memory for the
 machine-local / user-preference stuff; put transmissible engineering history here.
@@ -89,9 +97,9 @@ per-item plans/journeys (the *why*, companion to the throwaway `~/.claude/plans/
 
 ## Sibling directories
 
-- **`org/llm/research/`** — experiment harnesses, raw data and working notes.
+- **`org/llm/raku/research/`** — experiment harnesses, raw data and working notes.
   Method and mess; read when you want to check or extend a result.
-- **`org/llm/report/`** — the tidied findings those experiments produced. Read when
+- **`org/llm/raku/report/`** — the tidied findings those experiments produced. Read when
   you just want the answer. `report/raku-tokens/` measures what Raku's minority
   status actually costs in tokens. Short version: the *finished program* is
   token-neutral, but getting to a working one costs 5–12% more, and nearly all of

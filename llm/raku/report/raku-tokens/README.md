@@ -6,7 +6,7 @@ cost is elsewhere: getting to a *working* program takes 5–12% more, because Ra
 silently where Python fails loudly — 4 first-attempt failures in 24 blind Raku arms
 against 0 in 24 Python arms.**
 
-Method, raw data and caveats: `org/llm/research/raku-tokens/`.
+Method, raw data and caveats: `org/llm/raku/research/raku-tokens/`.
 Design and hypotheses stated in advance: `../../research/raku-tokens/00-preregistration.md`.
 
 ---

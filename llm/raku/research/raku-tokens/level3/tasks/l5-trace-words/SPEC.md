@@ -2,7 +2,7 @@
 
 ## Input
 
-Files sitting **directly** in `org/llm/traces/` (do not recurse) whose name ends
+Files sitting **directly** in `org/llm/raku/traces/` (do not recurse) whose name ends
 in `.md`.
 
 ## Task
