@@ -73,8 +73,20 @@ data is relative to its own root with an FNV-1a content digest beside it.
 present and byte-identical. It deliberately does not assert a match — off-host, a
 clean 100% would be luck. What portability buys is that **the delta is knowable**: if
 it reports 40% present, these figures were measured against a materially different
-corpus and should be re-derived rather than trusted. On the host that produced them
-it reports 2329/2329.
+corpus and should be re-derived rather than trusted.
+
+On the host that produced them it now reports **2313/2328, and `prose-markdown` at
+26%** — worth reading, because it is the machinery working rather than failing. The
+corpus was measured while these notes lived at `org/llm/`; extracting them into the
+`org-llm-raku` submodule moved 14 of the 19 prose files to `org/llm/raku/`, and the
+verifier looks them up by recorded path. Checked at the new path, 13 of those 14 are
+byte-identical and the fourteenth (`traces/README.md`) was edited by the extraction
+itself. The one further miss is a `.kt` file whose comment was re-pointed at the new
+path. **No measured content changed**, and the tables above stand; re-running
+`20-measure-corpus.raku` would refresh the paths and, since it re-samples, move the
+figures slightly for reasons that have nothing to do with the move. (An earlier
+version of this paragraph said 2329/2329. The TSV has 2328 data rows; the extra one
+was the header.)
 
 ### The trap in this table
 

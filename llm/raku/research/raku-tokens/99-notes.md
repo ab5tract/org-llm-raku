@@ -293,6 +293,27 @@ baseline, not load-bearing, but it is not a fully independent corpus either.
   is LTM. The patterns use `||`. Nothing in the self-test would have caught this —
   pretokenization would still have been lossless, just wrong.
 
+## The extraction into `org-llm-raku`
+
+This tree moved out of the plugin repo and became its `org/` submodule, re-rooted at
+`org/llm/raku/`. What that did to the recorded data, checked rather than assumed:
+
+- **`90-corpus-per-file.tsv` was not touched.** 14 of the 19 `prose-markdown` rows
+  therefore name paths under `org/llm/traces/` that no longer exist, and
+  `60-verify-corpus.raku` reports that corpus at 26%. Re-resolved at
+  `org/llm/raku/traces/`, 13 of the 14 are byte-identical; only `traces/README.md`
+  differs, because the extraction added a paragraph to it. One `kotlin-repo` row also
+  differs, from a comment re-pointed at the new path. Nothing measured changed.
+- **Not re-run, deliberately.** `20-measure-corpus.raku` re-samples, so refreshing the
+  paths would also move the headline figures for reasons unrelated to the move, and
+  the report would be describing a different measurement than the one it argues from.
+- **`92-paired.tsv` reproduced exactly** after the move, once `40-measure-paired.raku`
+  stopped counting `.parent` hops to the repo root — the extraction added a directory
+  and it had been pointing one level too high. Byte-identical output across all five
+  paired arms is the check that the relocation broke nothing.
+- **`repo-root` now takes `CORPUS_REPO_ROOT`.** The measured corpora are the *plugin's*
+  files; as a submodule the upward walk still finds them, standalone it cannot.
+
 ## What would strengthen this
 
 - ~~Run Level 3 properly, in blind sub-agent arms.~~ Done — see above.

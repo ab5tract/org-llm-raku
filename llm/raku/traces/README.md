@@ -94,6 +94,9 @@ per-item plans/journeys (the *why*, companion to the throwaway `~/.claude/plans/
 
 - **`bumping-supported-idea-version.md`** — releasing RIP for a new IDEA version
   (`.versions/*`, `./gradlew buildPlugin`).
+- **`extracting-org-into-a-submodule.md`** — how this tree became its own repository,
+  what the extra `raku/` path level broke silently, and the commit order to keep
+  straight now that edits here land in a different repo than the plugin.
 
 ## Sibling directories
 
