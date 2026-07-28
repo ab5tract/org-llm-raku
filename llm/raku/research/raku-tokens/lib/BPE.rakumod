@@ -74,6 +74,11 @@ class Encoder is export {
     has Str $.name;
 
     method load(::?CLASS:U: Str :$name!, Str :$path!, Regex :$pattern! --> Encoder) {
+        # The vocabularies are ~5 MB, reproducible, and gitignored, so a fresh
+        # clone always lands here first. Say which script fetches them rather
+        # than letting `.lines` report a bare "No such file or directory".
+        die "vocabulary $name is missing at $path.\nRun 10-fetch-vocab.raku first "
+            ~ "-- the .tiktoken files are downloaded, not committed." unless $path.IO.e;
         my %rank;
         for $path.IO.lines -> $line {
             next unless $line.chars;
