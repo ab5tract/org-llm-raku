@@ -48,3 +48,21 @@ gate indirect-name mirrors on the `::(` prefix.
 2. `raku -c` rejection is not proof of a syntax error: check whether the
    message is semantic ("not compile-time known") before concluding the IDE
    should also fail the parse. The NQP dialect is looser still.
+
+## Follow-up (commit 29926f97): tokens/rules too, and inspection fallout
+
+`token ::($meth_name)` went through `routine_name` (not `method_name`), which
+lacked the fix — and failed DIFFERENTLY: no BAD_CHARACTER, just silently
+wrong PSI (`ROUTINE_NAME('::')` + a bogus SIGNATURE holding `$meth_name` as
+a shadowing parameter). Downstream that surfaced as an "Unused parameter"
+inspection on the enclosing role's parameter. The hand-edit is now the
+shared `indirectNameEnd()` helper used by both `_9_routine_name` and
+`_10_method_name`; grammar mirrors on both rules. Lesson: a mis-parse that
+produces no error nodes can still be wrong — inspection false positives are
+a parse-bug smell worth tracing to PSI shape before touching the inspection.
+
+Same commit also: regex-embedded `:my $x := ...;` side-effect declarations
+exempted from unused-variable, and Rakudo-core detection got a file-level
+path fallback (`CommaProjectUtil.isRakudoCoreFile`, matching `rakudo/src/`)
+because the project-level flag misses Rakudo checkouts browsed from other
+projects.
