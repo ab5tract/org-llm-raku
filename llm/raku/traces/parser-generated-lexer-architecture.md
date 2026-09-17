@@ -18,19 +18,10 @@ regeneration. This doc exists so the next agent doesn't learn that the hard way.
 
 The generator is **`p6-grammar-to-idea`**, a Raku program that transpiles a
 restricted-Raku-grammar DSL into these Java files. Its input is a ~162 KB grammar
-file `perl6.pm6`. As of this writing that tool lived at (an ephemeral, machine-local
-checkout):
-
-```
-/tmp/intellij-ide-plugin/perl6-idea-plugin/tools/p6-grammar-to-idea/
-    perl6.pm6                      # the grammar source of truth
-    lib/P6GrammarToIdea/*.pm6      # GenerateLexer.pm6, GenerateParser.pm6, etc.
-    README.md
-```
-
-That path is **not** guaranteed to exist. The upstream is the `perl6-idea-plugin`
-project (the original Comma plugin this is forked from). If you need to regenerate,
-locate that tooling first; do not assume `/tmp` still has it.
+file `perl6.pm6`. **As of 2026-09-17 the tool is vendored in this repo** at
+`tools/p6-grammar-to-idea/` (from upstream Raku/intellij-ide-plugin), with all
+known MAINBraid hand-edits mirrored into its `perl6.pm6` — see `tools/README.md`
+for the mirror list and the Java::Generate regeneration blocker.
 
 `git log -- MAINBraid.java` shows only cosmetic/rename commits historically — it has
 never been regenerated in this repo. Treat it as vendored.
