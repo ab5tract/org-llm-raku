@@ -3,85 +3,95 @@
 Practical, load-bearing knowledge for getting tests to run and trusting their
 results. Several of these will waste an hour if you don't know them up front.
 
-## rakubrew must be initialized *and switched to a known Rakudo* in the same shell as gradle
+## Run against the newest Rakudo you have, and do not pin
 
-Tests spawn a real `raku` subprocess to load symbols. If `raku` isn't on `PATH`, they
-fail in `setUp()` (`CommaFixtureTestCase.suggestSdkHome()` → "Found a raku in path"
-assertion, or a symbol-load timeout). Every gradle invocation must be preceded, **in
-the same shell**, by:
+Tests spawn a real `raku` subprocess: to load CORE symbols, and -- for the RakuAST
+viewer -- to build the AST whose spans, slots and deparse output the tests assert
+against. If `raku` isn't on `PATH`, they fail in `setUp()`
+(`CommaFixtureTestCase.suggestSdkHome()` -> "Found a raku in path" assertion, or a
+symbol-load timeout).
+
+**The newest Rakudo wins.** Locally that is the source build under `$RAKU_PREFIX`,
+which is what the RakuAST work is developed against: its spans and deparse rules
+depend on node-origin information that older releases do not report at all.
 
 ```bash
-eval "$(~/.rakubrew/bin/rakubrew init Zsh)"
-rakubrew switch "${RAKUBREW_RAKU_VERSION:-moar-2026.03}"
+export PATH="$RAKU_PREFIX/bin:$PATH"
 ./gradlew test --rerun --tests "..."
 ```
 
-Shell state does not persist between tool calls, so put all of them in one command.
+Without a source build, take the newest release rakubrew offers. `rakubrew
+list-available` prints them oldest-first, so the last entry is the one you want, and
+the switch must happen in the *same* shell as gradle, because shell state does not
+persist between tool calls:
 
-**`moar-2026.03` is a default, not a blessing.** It is simply the release the
-currently pinned symbol-dependent expectations were written against (see the table
-below). Set `RAKUBREW_RAKU_VERSION` to work against a different Rakudo; the point of
-the `switch` line is that *some* known version is selected deliberately, not that it is
-this one. If you move the default, move the expectations with it and say so here —
-the failure mode documented at the end of this section is exactly what happens when
-the two drift apart.
+```bash
+eval "$(~/.rakubrew/bin/rakubrew init Zsh)"
+rakubrew switch moar-<newest>          # e.g. moar-2026.08
+./gradlew test --rerun --tests "..."
+```
 
-Three ways this line goes wrong, all of which end in a green build that proves nothing:
+Three things go wrong silently here, all of them ending in a green build that proves
+nothing:
 
-- **Versions carry their backend prefix: `moar-2026.03`, not `2026.03`.** A bare
-  `2026.03` prints "Sorry, '2026.03' not found. Did you mean: moar-2026.03" — but
-  through the `rakubrew` shell function that `init` installs it still returns success,
-  so `&&` chains march on with the switch silently not applied. (Called directly as
+- **The rakubrew version is `moar-2026.08`, not `2026.08`.** A bare `2026.08` prints
+  "Sorry, '2026.08' not found. Did you mean: moar-2026.08" -- but through the
+  `rakubrew` shell function that `init` installs it still returns success, so `&&`
+  chains march on with the switch silently not applied. (Called directly as
   `~/.rakubrew/bin/rakubrew`, outside the hook, the same mistake exits 1.)
 - **`--rerun` is not optional when you have changed only the environment.** `PATH` and
   the SDK are not declared inputs of the `test` task, so switching Rakudo leaves it
   `UP-TO-DATE`. `./gradlew test` then reports `BUILD SUCCESSFUL in 629ms` having
   executed zero tests. Check for `> Task :test UP-TO-DATE` before believing a result,
   and confirm the "N tests completed" line is present.
-- **`rakubrew init` alone may already be enough**, which masks the first bullet:
-  `init` exports `~/.rakubrew/versions/<CURRENT>/bin` at the front of `PATH`, and
-  `~/.rakubrew/CURRENT` may already be the version you want. The `switch` line is
-  insurance against `CURRENT` having drifted, not the thing doing the work.
+- **`suggestSdkHome()` takes the *first* `PATH` entry that looks like a Raku SDK
+  home.** Prepend, never append -- otherwise the system Rakudo in `/usr/bin` wins and
+  symbol-dependent assertions fail in ways that impersonate plugin bugs.
 
-**Omitting the preamble entirely is the most common way to waste an hour**, because the
-resulting failure is plausible. Running `./gradlew test` bare picks up the system Rakudo
-and `testCallArityMismatchAnnotating` fails on the missing `.perl` deprecation — which
-reads as a real regression in whatever you just changed. Stashing your work and
-re-running *also* fails, which looks like confirmation that the failure predates you.
-It does not; it confirms only that you forgot the preamble twice. `raku -v` first.
+`~/.rakubrew/MODE` is `env` here, so rakubrew works by rewriting `PATH` from the shell
+hook; there are no shims. A `PATH` that lacks the hook is the normal failure mode for
+a non-interactive shell that never sourced the user's profile.
 
-**The `switch` line is load-bearing, not decoration.** `suggestSdkHome()` takes the
-first `PATH` entry that looks like a Raku SDK home, so without it the system Rakudo in
-`/usr/bin` wins. Symbol-dependent assertions then fail in ways that impersonate plugin
-bugs, because CORE.setting genuinely differs between releases:
+## A failing symbol-dependent assertion is a version question first
 
-| | 2026.03 (canonical) | 2025.08 (system) |
+CORE.setting and RakuAST both genuinely differ between releases, so an expectation can
+fail while the plugin is faithfully reporting whatever Rakudo told it. **Check
+`raku -v` before you touch the expectation**, and confirm the difference at its source
+-- ask Rakudo directly rather than inferring it from the test:
+
+| | older | newer |
 |---|---|---|
-| `Mu.^find_method("perl").candidates[0].DEPRECATED` | `raku` | *absent* |
-| `&open.candidates` | 2 — `("-", \|c)`, `($path, \|c)` | 1 — `(IO(Any) $path, \|c)` |
+| `*%_` declared type (2026.03 -> 2026.08) | `Mu` | `Associative` |
+| `RakuAST::StrLiteral` origin for `my $x = "cool";` (2026.03 -> 2026.08) | no span at all | span `cool`, drag span `"cool"` |
+| `Mu.^find_method("perl").candidates[0].DEPRECATED` (2025.08 -> 2026.03) | *absent* | `raku` |
+| `&open.candidates` (2025.08 -> 2026.03) | 1 -- `(IO(Any) $path, \|c)` | 2 -- `("-", \|c)`, `($path, \|c)` |
 
 On 2025.08 `raku-core-symbols.raku` emits `perl` with no `x` (deprecation) key, so no
-deprecation warning is possible; and `open` is no longer a multi with several
-candidates, so an arity error reads "Not enough positional arguments" rather than
-enumerating "No multi candidates match (...)".
+deprecation warning is possible; and `open` is not yet a multi with several candidates,
+so an arity error reads "Not enough positional arguments" rather than enumerating
+"No multi candidates match (...)".
 
-**When a symbol-dependent assertion fails, check `raku -v` before you touch the
-expectation.** An expectation that merely encodes a different Rakudo is not evidence of
-a regression, and deleting it can make things worse.
+**When they differ, move the expectation forward. Do not pin the environment back.**
+This file used to advise the opposite, and the cost is on record twice over.
 
-That is not hypothetical: the `.perl` expectation was removed to get the suite green on
-2025.08, and then the environment was pinned to 2026.03, where `Mu.perl` *is*
-deprecated. The same test went on failing with the comparison inverted — the warning
-was now reported as **extra** rather than missing. Two fixes, each locally reasonable,
-that cancelled out. The expectation is restored and the canonical SDK is what makes it
-hold.
+The `.perl` expectation was removed to get the suite green on 2025.08, and then the
+environment was pinned to 2026.03, where `Mu.perl` *is* deprecated. The same test went
+on failing with the comparison inverted -- the warning now reported as **extra** rather
+than missing. Two fixes, each locally reasonable, that cancelled out.
 
-Of the two cases in the table, only `open` is unpinned (`1b187385`, see below); `.perl`
-is pinned again and depends on running 2026.03.
+Then the pin rotted in the other direction: held at 2026.03, all eight RakuAST viewer
+tests failed, because 2026.03 does not report the node origins the viewer is built on
+-- `StrLiteral` had no span, so the drag span came back as `= "cool"` and slots
+resolved one level up (`initializer` where the test expected `expression`). Nothing was
+wrong with the plugin. The fix was the environment, and the three `*%_` expectations
+that had quietly encoded 2026.03 moved forward with it.
+
+Where the varying part belongs to Rakudo rather than to the plugin, prefer an assertion
+that does not pin it at all -- see the next section.
 
 Note that the deprecation lives on the *candidate*, not on the proto (`is DEPRECATED`
 is a `Method+{is-DEPRECATED}` mixin), which is why probing `$m.DEPRECATED` on the proto
-reports nothing even on 2026.03.
+reports nothing even where it is deprecated.
 
 ## Assertions built from CORE.setting text should not be pinned exactly
 
@@ -98,9 +108,6 @@ assertion passes even when the annotation vanishes entirely. Configure the sourc
 This is the right tool only when the varying part belongs to Rakudo. An annotation the
 plugin composes itself should still be pinned exactly.
 
-`~/.rakubrew/MODE` is `env` here, so rakubrew works by rewriting `PATH` from the shell
-hook; there are no shims. A `PATH` that lacks the hook is the normal failure mode for
-a non-interactive shell that never sourced the user's profile.
 
 ## ~~The `checkHighlighting()` pipeline is broken~~ / ~~use a checkpoint subset~~ — RESOLVED
 
