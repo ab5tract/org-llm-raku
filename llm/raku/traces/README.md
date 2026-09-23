@@ -26,12 +26,14 @@ machine-local / user-preference stuff; put transmissible engineering history her
 
 ## Start here (recommended reading order)
 
-1. **`test-harness-and-environment.md`** — how to run tests at all (`rakubrew init`
-   **plus `rakubrew switch "${RAKUBREW_RAKU_VERSION:-moar-2026.03}"`**, note the
-   `moar-` prefix; logged-errors-as-failures; skipping when a Raku module isn't
-   installed). Read this before running anything: on the wrong Rakudo the suite fails
-   in ways that impersonate plugin bugs, and `--rerun` is what stops gradle reporting
-   a green `UP-TO-DATE` build that ran nothing.
+1. **`test-harness-and-environment.md`** — how to run tests at all (**run against the
+   newest Rakudo you have** — `$RAKU_PREFIX/bin` on `PATH`, or the newest rakubrew
+   release, noting the `moar-` prefix; logged-errors-as-failures; skipping when a Raku
+   module isn't installed). Read this before running anything: on the wrong Rakudo the
+   suite fails in ways that impersonate plugin bugs, and `--rerun` is what stops gradle
+   reporting a green `UP-TO-DATE` build that ran nothing. It also says why the old
+   advice to *pin* a release was wrong, and what to do instead when an expectation
+   turns out to encode one.
 1b. **`test-harness-project-reuse.md`** — why the suite used to take ~69 minutes and
    produce flaky, symptom-diverse failures, and what fixed it. Read it if any older
    note tells you the highlighting pipeline is broken or to run a "checkpoint subset";
